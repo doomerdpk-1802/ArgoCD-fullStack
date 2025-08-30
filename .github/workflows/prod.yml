@@ -56,12 +56,12 @@ jobs:
 
           # Update backend image only if it was rebuilt
           if [ "${{ env.BUILD_SRC }}" = "true" ]; then
-            sed -i "s|repository: doomerdpk/argobackend.*|repository: doomerdpk/argobackend\n    tag: ${{ github.sha }}|" ./k8s-fullstack-chart/values.yml
+            sed -i "s|repository: doomerdpk/argobackend.*|repository: doomerdpk/argobackend\n    tag: ${{ github.sha }}|" ./k8s-fullstack-chart/values.yaml
           fi
 
           # Update frontend image only if it was rebuilt
           if [ "${{ env.BUILD_PUBLIC }}" = "true" ]; then
-            sed -i "s|repository: doomerdpk/argofrontend.*|repository: doomerdpk/argofrontend\n    tag: ${{ github.sha }}|" ./k8s-fullstack-chart/values.yml
+            sed -i "s|repository: doomerdpk/argofrontend.*|repository: doomerdpk/argofrontend\n    tag: ${{ github.sha }}|" ./k8s-fullstack-chart/values.yaml
           fi
 
           git config user.name "GitHub Actions Bot"
