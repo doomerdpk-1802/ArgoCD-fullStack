@@ -46,3 +46,32 @@ jobs:
           file: ./Dockerfile-public
           push: true
           tags: doomerdpk/argofrontend:${{ github.sha }}
+
+      - name: Clone ArgoCD-Ops repo, update, and push
+        env:
+          PAT: ${{ secrets.OPS_PAT }}
+        run: |
+          git clone https://github.com/doomerdpk-1802/ArgoCD-Ops.git
+          cd ArgoCD-Ops
+
+          # Update backend image only if it was rebuilt
+          if [ "${{ env.BUILD_SRC }}" = "true" ]; then
+            sed -i "s|repository: doomerdpk/argobackend.*|repository: doomerdpk/argobackend\n    tag: ${{ github.sha }}|" k8s-fullstack-chart/values.yml
+          fi
+
+          # Update frontend image only if it was rebuilt
+          if [ "${{ env.BUILD_PUBLIC }}" = "true" ]; then
+            sed -i "s|repository: doomerdpk/argofrontend.*|repository: doomerdpk/argofrontend\n    tag: ${{ github.sha }}|" k8s-fullstack-chart/values.yml
+          fi
+
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add k8s-fullstack-chart/values.yml
+
+          # Commit message shows which images were updated
+          MSG="Update images:"
+          if [ "${{ env.BUILD_SRC }}" = "true" ]; then MSG="$MSG backend=${{ github.sha }}"; fi
+          if [ "${{ env.BUILD_PUBLIC }}" = "true" ]; then MSG="$MSG frontend=${{ github.sha }}"; fi
+          git commit -m "$MSG"
+
+          git push https://${PAT}@github.com/doomerdpk-1802/ArgoCD-Ops.git main
