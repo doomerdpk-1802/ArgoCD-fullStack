@@ -66,7 +66,7 @@ jobs:
 
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add k8s-fullstack-chart/values.yml
+          git add k8s-fullstack-chart/values.yaml
 
           # Commit message shows which images were updated
           MSG="Update images:"
