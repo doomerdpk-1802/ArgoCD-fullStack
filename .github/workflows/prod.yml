@@ -38,6 +38,15 @@ jobs:
           push: true
           tags: doomerdpk/argobackend:${{ github.sha }}
 
+      - name: Build and push image for Frontend
+        if: env.BUILD_PUBLIC == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile-public
+          push: true
+          tags: doomerdpk/argofrontend:${{ github.sha }}
+
       - name: Clone ArgoCD-Ops repo, update, and push
         env:
           PAT: ${{ secrets.OPS_PAT }}
@@ -51,7 +60,7 @@ jobs:
 
           # Update backend image tag only if it was rebuilt
           if [ "${{ env.BUILD_SRC }}" = "true" ]; then
-            yq -i '.backendimage.tag = "${{ github.sha }}"' ./k8s-fullstack-chart/values.yaml
+            yq -i '.backend.backendimage.tag = "${{ github.sha }}"' ./k8s-fullstack-chart/values.yaml
           fi
 
           # Update frontend image tag only if it was rebuilt
