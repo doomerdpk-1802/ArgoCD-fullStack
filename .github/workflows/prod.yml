@@ -45,21 +45,27 @@ jobs:
           git clone https://github.com/doomerdpk-1802/ArgoCD-Ops.git
           cd ArgoCD-Ops
 
-          # Update backend tag if rebuilt
+          # Install yq if not already available
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+          # Update backend image tag only if it was rebuilt
           if [ "${{ env.BUILD_SRC }}" = "true" ]; then
-            sed -i "/repository: doomerdpk\/argobackend/{n;s|.*tag:.*|  tag: ${{ github.sha }}|}" ./k8s-fullstack-chart/values.yaml
+            yq -i '.backendimage.tag = "${{ github.sha }}"' ./k8s-fullstack-chart/values.yaml
           fi
 
-          # Update frontend tag if rebuilt
+          # Update frontend image tag only if it was rebuilt
           if [ "${{ env.BUILD_PUBLIC }}" = "true" ]; then
-            sed -i "/repository: doomerdpk\/argofrontend/{n;s|.*tag:.*|  tag: ${{ github.sha }}|}" ./k8s-fullstack-chart/values.yaml
+            yq -i '.frontend.frontendimage.tag = "${{ github.sha }}"' ./k8s-fullstack-chart/values.yaml
           fi
 
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
+          # Stage changes
           git add k8s-fullstack-chart/values.yaml || true
 
+          # Commit only if there are changes
           if git diff --cached --quiet; then
             echo "No changes to commit, skipping push."
           else
